@@ -1,0 +1,10 @@
+__pycache__/
+tests/__pycache__/
+.agents/
+.git/
+.idea/
+.venv/
+venv/
+*.pyc
+*.log
+.env

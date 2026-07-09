@@ -1,0 +1,324 @@
+ГАЙД ПО ПРОЕКТУ "БАЗА ЗНАНИЙ И ИНСТРУКЦИЙ"
+==========================================
+
+1. КАК ВСЕ ДОЛЖНО РАБОТАТЬ
+--------------------------
+
+Проект состоит из трех частей:
+
+1) Сайт:
+   - главная страница: site.html
+   - стили: frontend/assets/site.css
+   - логика сайта: frontend/assets/site-app.js
+   - логотип: frontend/assets/grass-logo.png
+
+   Основной цвет интерфейса: #00AB16.
+
+   Сайт открывается в браузере и сам обращается к API:
+   - получает список разделов;
+   - получает список инструкций;
+   - фильтрует инструкции по выбранному разделу;
+   - ищет инструкции по названию;
+   - при открытии инструкции запрашивает ее полное содержимое.
+
+2) API-сервис:
+   - файл: api.py
+   - фреймворк: FastAPI
+   - запуск в Docker: uvicorn api:app --host 0.0.0.0 --port 8000
+   - локальный запуск на Windows: .\.venv\Scripts\python.exe main.py
+
+   API подключается к PostgreSQL под пользователем instr-api-user.
+   Этот пользователь имеет только права на чтение.
+
+3) База данных PostgreSQL:
+   - база: instructions_db
+   - пользователь API: instr-api-user
+   - таблицы: categories, instructions
+   - создание объектов: init_db.sql
+   - стартовое наполнение инструкциями: seed_instructions.sql
+
+   Инструкции хранятся в таблице instructions.
+   Поле content хранится как JSONB, чтобы сайт мог безопасно отрисовывать блоки
+   инструкции: заголовки, абзацы, списки, шаги, заметки, предупреждения, код,
+   ссылки и изображения.
+
+
+2. ОСНОВНЫЕ АДРЕСА
+------------------
+
+После запуска:
+
+Сайт:
+http://127.0.0.1:8000/
+
+OpenAPI-документация:
+http://127.0.0.1:8000/docs
+
+Проверка API без базы:
+http://127.0.0.1:8000/health/live
+
+Проверка API с подключением к базе:
+http://127.0.0.1:8000/health/ready
+
+Список разделов:
+http://127.0.0.1:8000/api/v1/categories
+
+Список инструкций:
+http://127.0.0.1:8000/api/v1/instructions
+
+
+3. ЗАПУСК ЧЕРЕЗ DOCKER
+----------------------
+
+Это основной вариант запуска.
+
+Шаг 1. Перейти в папку проекта:
+
+cd C:\Users\Данил\PyCharmMiscProject
+
+Шаг 2. Создать .env из примера:
+
+Copy-Item .env.example .env
+
+Шаг 3. Открыть .env и заменить пароли:
+
+notepad .env
+
+Обязательно поменять:
+
+DB_PASSWORD=replace-with-a-strong-password
+POSTGRES_PASSWORD=replace-with-a-strong-postgres-admin-password
+
+DB_PASSWORD - пароль пользователя instr-api-user.
+POSTGRES_PASSWORD - пароль администратора PostgreSQL внутри контейнера.
+
+Шаг 4. Запустить проект:
+
+docker compose up --build -d
+
+Шаг 5. Проверить контейнеры:
+
+docker compose ps
+
+Шаг 6. Открыть сайт:
+
+http://127.0.0.1:8000/
+
+При первом запуске Docker автоматически:
+1) поднимет PostgreSQL;
+2) выполнит docker/postgres/00-init-db.sh;
+3) через init_db.sql создаст базу instructions_db;
+4) создаст пользователя instr-api-user;
+5) создаст таблицы categories и instructions;
+6) выдаст instr-api-user только права на чтение;
+7) поднимет API и сайт.
+
+Стартовые инструкции добавляются из файла seed_instructions.sql.
+
+Важно:
+init_db.sql выполняется только при первом создании Docker volume.
+Если база уже создана, повторный docker compose up не пересоздает таблицы и не
+прогоняет init-скрипты заново.
+
+Если база уже создана и нужно повторно применить стартовые инструкции:
+
+docker compose cp seed_instructions.sql db:/tmp/seed_instructions.sql
+docker compose exec -T db psql -U postgres -d instructions_db -f /tmp/seed_instructions.sql
+docker compose up --build -d api
+
+
+4. ОСТАНОВКА DOCKER
+-------------------
+
+Остановить контейнеры:
+
+docker compose down
+
+Остановить контейнеры и удалить базу вместе с volume:
+
+docker compose down -v
+
+Команда docker compose down -v удаляет данные PostgreSQL.
+Использовать ее только если нужно полностью пересоздать базу с нуля.
+
+
+5. ЛОКАЛЬНЫЙ ЗАПУСК БЕЗ DOCKER
+------------------------------
+
+Этот вариант нужен для разработки.
+
+Шаг 1. Создать базу через psql от администратора PostgreSQL:
+
+psql -U postgres -v api_password='replace-with-a-strong-password' -f init_db.sql postgres
+
+Шаг 2. Установить зависимости:
+
+.\.venv\Scripts\python.exe -m pip install -r requirements-api.txt
+
+Шаг 3. Задать пароль пользователя instr-api-user:
+
+$env:DB_PASSWORD='replace-with-a-strong-password'
+
+Шаг 4. Запустить API на Windows:
+
+.\.venv\Scripts\python.exe main.py
+
+На Windows важно запускать main.py, потому что async-драйвер PostgreSQL требует
+совместимый event loop.
+
+
+6. КАК ДОБАВЛЯТЬ ИНСТРУКЦИИ
+---------------------------
+
+Пользователь instr-api-user только читает данные.
+Добавлять и редактировать инструкции нужно под отдельным администратором или
+редактором базы данных.
+
+Пример добавления инструкции:
+
+INSERT INTO instructions (category_id, slug, title, summary, content, tags, is_published)
+SELECT id,
+       'install-printer',
+       'Как установить принтер',
+       'Краткое описание инструкции',
+       '{
+          "type": "document",
+          "blocks": [
+            {"type": "heading", "level": 2, "text": "Подготовка"},
+            {"type": "paragraph", "text": "Подключитесь к корпоративной сети."},
+            {
+              "type": "steps",
+              "items": [
+                {"title": "Откройте параметры", "text": "Перейдите в раздел устройств."},
+                {"title": "Добавьте принтер", "text": "Выберите его из списка."}
+              ]
+            },
+            {"type": "note", "title": "Важно", "text": "Распечатайте тестовую страницу."}
+          ]
+        }'::jsonb,
+       ARRAY['принтер', 'windows'],
+       TRUE
+FROM categories
+WHERE slug = 'printers-and-scanners';
+
+Чтобы инструкция появилась на сайте:
+1) is_published должен быть TRUE;
+2) раздел должен быть активным;
+3) slug инструкции должен состоять из латинских букв, цифр и дефисов.
+
+
+7. ФОРМАТ CONTENT
+-----------------
+
+Сайт поддерживает такие блоки:
+
+heading:
+{"type":"heading","level":2,"text":"Заголовок"}
+
+paragraph:
+{"type":"paragraph","text":"Обычный текст"}
+
+list:
+{"type":"list","items":["Пункт 1","Пункт 2"]}
+
+steps:
+{"type":"steps","items":[{"title":"Шаг 1","text":"Описание шага"}]}
+
+note:
+{"type":"note","title":"Важно","text":"Текст заметки"}
+
+warning:
+{"type":"warning","title":"Внимание","text":"Текст предупреждения"}
+
+danger:
+{"type":"danger","title":"Опасно","text":"Критичное предупреждение"}
+
+code:
+{"type":"code","code":"ipconfig /all"}
+
+link:
+{"type":"link","label":"Открыть портал","url":"https://example.com"}
+
+image:
+{"type":"image","url":"https://example.com/image.png","alt":"Описание"}
+
+screenshot:
+{"type":"screenshot","url":"/assets/instructions/example.png","caption":"Окно настроек"}
+
+gallery / screenshots:
+{
+  "type":"screenshots",
+  "items":[
+    {"url":"/assets/instructions/step-1.png","caption":"Шаг 1"},
+    {"url":"/assets/instructions/step-2.png","caption":"Шаг 2"}
+  ]
+}
+
+Скриншоты можно хранить в статике проекта, например:
+
+frontend/assets/instructions/example.png
+
+И указывать в JSON как:
+
+/assets/instructions/example.png
+
+Большие инструкции на сайте открываются в прокручиваемой области.
+Список инструкций загружается целиком и прокручивается в правой рабочей области.
+Левое меню с категориями при этом остается на месте.
+
+
+8. ПРОВЕРКА ПРОЕКТА
+-------------------
+
+Проверить Python:
+
+.\.venv\Scripts\python.exe -m compileall -q api.py main.py tests\mock_app.py
+
+Проверить JavaScript:
+
+node --check frontend\assets\site-app.js
+
+Проверить старый JS, если он остается в проекте:
+
+node --check frontend\assets\app.js
+
+Проверить Docker-конфигурацию:
+
+docker compose config
+
+
+9. ТЕСТОВЫЙ САЙТ БЕЗ POSTGRESQL
+-------------------------------
+
+Для визуальной проверки интерфейса без настоящей базы можно запустить мок:
+
+.\.venv\Scripts\python.exe -m uvicorn tests.mock_app:app --host 127.0.0.1 --port 8010
+
+После этого открыть:
+
+http://127.0.0.1:8010/
+
+Этот режим нужен только для проверки сайта.
+Production должен работать через api.py и PostgreSQL.
+
+
+10. ЕСЛИ ЧТО-ТО НЕ РАБОТАЕТ
+---------------------------
+
+Проверить логи:
+
+docker compose logs api
+docker compose logs db
+
+Проверить, что API видит базу:
+
+http://127.0.0.1:8000/health/ready
+
+Если /health/live работает, а /health/ready нет, значит API запущен, но есть
+проблема с подключением к PostgreSQL или правами пользователя instr-api-user.
+
+Если сайт открывается, но инструкций нет:
+1) проверить, что в таблице instructions есть записи;
+2) проверить, что is_published = TRUE;
+3) проверить, что категория активна;
+4) проверить endpoint /api/v1/instructions.

@@ -1,0 +1,13 @@
+.env
+.actual-server.*.log
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.idea/
+.agents/
+instructions_backup.sql

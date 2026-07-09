@@ -1,0 +1,66 @@
+ОТЧЕТ ПО ПРОВЕРКЕ БЕЗОПАСНОСТИ ОТ 2026-07-09
+============================================
+
+Что проверено:
+1. SQL-запросы в api.py.
+2. Поиск, фильтр category, detail-запросы по slug и id.
+3. Права пользователя PostgreSQL instr-api-user.
+4. Отрисовка JSON-контента инструкций на фронтенде.
+5. Загрузка изображений из JSON-инструкций.
+6. Dockerfile и запуск API-контейнера.
+7. Наличие секретов рядом с проектом и риск случайной передачи .env.
+
+Итог по SQL-инъекциям:
+- Критичных SQL-инъекций не найдено.
+- Пользовательские значения q, category, category_slug, instruction_slug, instruction_id, limit и offset не подставляются в SQL как сырой текст.
+- q экранируется для ILIKE через _literal_like_pattern.
+- category и slug дополнительно ограничены regex-валидацией FastAPI.
+- limit ограничен 1..100.
+- offset ограничен 0..10000.
+
+Что исправлено:
+1. Добавлены security headers:
+   - Content-Security-Policy
+   - X-Content-Type-Options: nosniff
+   - X-Frame-Options: DENY
+   - Referrer-Policy: no-referrer
+   - Permissions-Policy для запрета камеры, микрофона и геолокации.
+
+2. Изображения в инструкциях теперь разрешены только с текущего сайта и только из /assets/.
+   Это защищает от внешних tracking pixels и случайной загрузки контента с чужих доменов.
+
+3. HTML из базы не исполняется:
+   - innerHTML / outerHTML / insertAdjacentHTML / eval / new Function не используются в site-app.js.
+   - Текст выводится через textContent и DOM API.
+
+4. Права instr-api-user ужесточены:
+   - SELECT только на categories и instructions.
+   - Нет прав на INSERT/UPDATE/DELETE.
+   - Нет автоматического SELECT на будущие таблицы public.
+   - default_transaction_read_only остается включенным.
+
+5. Dockerfile усилен:
+   - API запускается от appuser, а не от root.
+
+6. Добавлен .gitignore:
+   - .env, логи, виртуальные окружения, кеши Python и служебные файлы не должны случайно попасть в передачу проекта.
+   - .dockerignore также исключает .env из Docker build context, чтобы пароли не запекались в image.
+
+7. Добавлена тестовая инструкция:
+   - slug: test-picture-instruction
+   - раздел: other
+   - картинка: /assets/instructions/test-picture.svg
+
+Проверки после исправлений:
+1. node --check frontend/assets/site-app.js: OK
+2. Python syntax api.py/main.py через compile(...): OK
+3. GET /: 200 OK
+4. Security headers на /: присутствуют
+5. GET /assets/instructions/test-picture.svg: 200 OK, image/svg+xml
+6. GET /api/v1/instructions/by-slug/other/test-picture-instruction: инструкция найдена
+7. GET /api/v1/instructions?q=' OR 1=1 --: total=0
+8. GET /api/v1/instructions?category=other' OR 1=1--: 422
+9. Права instr-api-user: только SELECT на categories и instructions
+10. INSERT под instr-api-user: ошибка "cannot execute INSERT in a read-only transaction"
+11. API-контейнер: uid=1000(appuser)
+12. Контейнеры api и db: healthy

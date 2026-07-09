@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Инструкции ИТ-поддержки для сотрудников">
+  <meta name="theme-color" content="#17233c">
+  <title>База знаний — ИТ-поддержка</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Перейти к содержимому</a>
+
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="icon-printer" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M18 12h.01"/></symbol>
+    <symbol id="icon-mail" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></symbol>
+    <symbol id="icon-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="5"/><path d="m11.5 11.5 8-8M16 7l2 2M18 5l2 2"/></symbol>
+    <symbol id="icon-terminal" viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="17" rx="2"/><path d="m6.5 9 3 3-3 3M12.5 15h5"/></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="icon-wifi" viewBox="0 0 24 24"><path d="M2.5 8.5a15 15 0 0 1 19 0M5.5 12a10 10 0 0 1 13 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/></symbol>
+    <symbol id="icon-video" viewBox="0 0 24 24"><rect x="2.5" y="5" width="14" height="14" rx="2"/><path d="m16.5 10 5-3v10l-5-3"/></symbol>
+    <symbol id="icon-laptop" viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="12" rx="2"/><path d="M2 19h20M9 19l1-3.5h4l1 3.5"/></symbol>
+    <symbol id="icon-mouse" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="6"/><path d="M12 2v7M6 10h12"/></symbol>
+    <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="icon-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="icon-doc" viewBox="0 0 24 24"><path d="M6 2.5h8l4 4V21H6z"/><path d="M14 2.5V7h4M9 12h6M9 16h6"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19z"/><path d="M12 9v5M12 17.5h.01"/></symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/" data-home-link aria-label="База знаний — на главную">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><path d="M11 9.5h12a6 6 0 0 1 6 6v15H17a6 6 0 0 1-6-6z"/><path d="M29 15.5H17a6 6 0 0 0-6 6"/><path d="M18 14h6M18 19h6"/></svg>
+        </span>
+        <span class="brand-copy"><strong>База знаний</strong><small>ИТ-поддержка</small></span>
+      </a>
+
+      <form class="header-search" id="search-form" role="search">
+        <svg aria-hidden="true"><use href="#icon-search"></use></svg>
+        <label class="sr-only" for="search-input">Поиск по названию инструкции</label>
+        <input id="search-input" type="search" autocomplete="off" maxlength="200" placeholder="Найти инструкцию...">
+        <kbd aria-hidden="true">Ctrl K</kbd>
+      </form>
+
+      <a class="support-link" href="mailto:support@example.ru">
+        <span class="support-dot" aria-hidden="true"></span>
+        ИТ-поддержка
+      </a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+    <aside class="sidebar" aria-label="Разделы базы знаний">
+      <div class="sidebar-heading">
+        <span>Разделы</span>
+        <span class="sidebar-total" id="sidebar-total">—</span>
+      </div>
+      <nav class="category-nav" id="category-nav" aria-label="Разделы">
+        <div class="nav-skeleton"></div><div class="nav-skeleton"></div><div class="nav-skeleton"></div>
+      </nav>
+      <div class="sidebar-help">
+        <span class="sidebar-help-icon"><svg aria-hidden="true"><use href="#icon-alert"></use></svg></span>
+        <div><strong>Не нашли ответ?</strong><a href="mailto:support@example.ru">Написать в поддержку</a></div>
+      </div>
+    </aside>
+
+    <main id="main-content" class="main-content" tabindex="-1">
+      <section id="catalog-view">
+        <div class="hero">
+          <p class="eyebrow">Самообслуживание · 24/7</p>
+          <h1 id="page-title">Ответы на частые вопросы</h1>
+          <p id="page-description">Пошаговые инструкции помогут быстро решить типовые технические задачи.</p>
+        </div>
+
+        <section class="category-section" id="category-section" aria-labelledby="category-section-title">
+          <div class="section-heading">
+            <div><p class="section-kicker">Навигация</p><h2 id="category-section-title">Популярные разделы</h2></div>
+            <span class="section-note">Выберите тему</span>
+          </div>
+          <div class="category-grid" id="category-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="instructions-section" aria-labelledby="instructions-title">
+          <div class="section-heading instructions-heading">
+            <div><p class="section-kicker" id="instructions-kicker">Все материалы</p><h2 id="instructions-title">Последние инструкции</h2></div>
+            <span class="result-count" id="result-count">—</span>
+          </div>
+          <div class="instruction-list" id="instruction-list" aria-live="polite" aria-busy="true">
+            <div class="card-skeleton"></div><div class="card-skeleton"></div><div class="card-skeleton"></div>
+          </div>
+        </section>
+      </section>
+
+      <article id="instruction-view" class="instruction-view" hidden>
+        <button class="back-button" id="back-button" type="button"><svg aria-hidden="true"><use href="#icon-back"></use></svg>К списку инструкций</button>
+        <div id="instruction-detail" aria-live="polite"></div>
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    <span>База знаний ИТ-поддержки</span>
+    <span>Информация для сотрудников компании</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
