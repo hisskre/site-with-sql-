@@ -7,6 +7,7 @@ const categoryIcons = {
   "printers-and-scanners": "printer",
   outlook: "mail",
   "password-reset": "key",
+  multifactor: "shield",
   terminals: "server",
   users: "users",
   forticlient: "shield",

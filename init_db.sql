@@ -103,6 +103,7 @@ VALUES
     ('printers-and-scanners', 'Принтеры и сканеры', 10),
     ('outlook', 'Почта Outlook', 20),
     ('password-reset', 'Сброс паролей', 30),
+    ('multifactor', 'Multifactor', 35),
     ('terminals', 'Терминалы', 40),
     ('users', 'Пользователям', 50),
     ('forticlient', 'FortiClient', 60),
